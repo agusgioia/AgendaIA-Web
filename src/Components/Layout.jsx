@@ -3,7 +3,7 @@ import Header from "./Header";
 import { Button } from "primereact/button";
 import { Link, useNavigate } from "react-router-dom";
 import { signOut, getAuth } from "firebase/auth";
-import useAuth from "../Hooks/UseAuth";
+import useAuth from "../Hooks/useAuth";
 
 export default function Layout({ children }) {
   const navigate = useNavigate();

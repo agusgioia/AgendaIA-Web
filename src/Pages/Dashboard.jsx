@@ -1,6 +1,6 @@
 import Layout from "../Components/Layout";
 import VoiceAssistant from "../Components/VoiceAssistant";
-import useAuth from "../Hooks/UseAuth";
+import useAuth from "../Hooks/useAuth";
 import { useEffect, useState } from "react";
 import { getId } from "../Api/api";
 import { ProgressSpinner } from "primereact/progressspinner";

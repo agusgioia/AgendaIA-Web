@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { sendVoice } from "../Api/api";
-import useAuth from "../Hooks/UseAuth";
+import useAuth from "../Hooks/useAuth";
 
 export default function VoiceAssistant() {
   const { user } = useAuth();
