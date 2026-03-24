@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* VARIABLES */
+:root {
+  --bg-primary: #020617; /* negro profundo */
+  --bg-secondary: #020617;
+  --accent: #14532d; /* verde oscuro fuerte */
+  --accent-2: #1e3a8a; /* azul profundo */
+  --accent-3: #3b0764; /* violeta oscuro */
+  --text-primary: #020617;
+  --text-secondary: #020617;
+}
+
+/* BODY */
+body {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 40%, #ffffff 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* FONDO CON PRESENCIA (OSCURO, NO LAVADO) */
+body::before {
+  content: "";
+  position: fixed;
+  top: -20%;
+  left: -20%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  opacity: 0.25;
+  filter: blur(160px);
+  z-index: -1;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  bottom: -20%;
+  right: -20%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, var(--accent-2) 0%, transparent 70%);
+  opacity: 0.2;
+  filter: blur(180px);
+  z-index: -1;
+}
+
+/* SCROLL */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #111827;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1f2937;
+}
+
+/* TEXTO */
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+/* LINKS / BOTONES */
+a,
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.02);
+}
+
+/* SELECCIÓN */
+::selection {
+  background: #1e3a8a;
+  color: #e5e7eb;
+}
+
+/* SUAVIZADO */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* CONTENEDOR GENERAL */
+.fc {
+  color: #e5e7eb; /* texto claro */
+}
+
+/* HEADER (mes, botones) */
+.fc-toolbar-title {
+  color: #ffffff;
+}
+
+.fc-button {
+  background-color: #1f2937 !important;
+  border: none !important;
+  color: #e5e7eb !important;
+}
+
+.fc-button:hover {
+  background-color: #374151 !important;
+}
+
+/* DÍAS (números) */
+.fc-daygrid-day-number {
+  color: #9ca3af;
+}
+
+/* CELDAS */
+.fc-daygrid-day {
+  background-color: #111827;
+  border: 1px solid #1f2937;
+}
+
+/* EVENTOS */
+.fc-event {
+  background-color: #2563eb !important;
+  border: none !important;
+  color: white !important;
+  font-size: 0.85rem;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+
+/* 🔥 CLAVE: que el texto NO se corte */
+.fc-event-title {
+  white-space: normal !important; /* permite salto de línea */
+  overflow: visible !important;
+}
+
+/* 🔥 CLAVE: agrandar altura de celdas */
+.fc-daygrid-day-frame {
+  min-height: 100px; /* ajustá a gusto */
+}
+
+/* MÁS ESPACIO PARA EVENTOS */
+.fc-daygrid-event {
+  margin-bottom: 4px;
+}
+
+/* HOY */
+.fc-day-today {
+  background-color: #1e3a8a !important;
+}
