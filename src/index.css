@@ -2,20 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* RESET */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* VARIABLES */
 :root {
-  --bg-primary: #020617; /* negro profundo */
+  --bg-primary: #020617;
   --bg-secondary: #020617;
-  --accent: #14532d; /* verde oscuro fuerte */
-  --accent-2: #1e3a8a; /* azul profundo */
-  --accent-3: #3b0764; /* violeta oscuro */
+  --accent: #14532d;
+  --accent-2: #1e3a8a;
+  --accent-3: #3b0764;
   --text-primary: #020617;
   --text-secondary: #020617;
 }
@@ -34,7 +32,7 @@ body {
   overflow-x: hidden;
 }
 
-/* FONDO CON PRESENCIA (OSCURO, NO LAVADO) */
+/* FONDO CON PRESENCIA*/
 body::before {
   content: "";
   position: fixed;
@@ -150,15 +148,15 @@ button:hover {
   border-radius: 6px;
 }
 
-/* 🔥 CLAVE: que el texto NO se corte */
+/*que el texto NO se corte */
 .fc-event-title {
-  white-space: normal !important; /* permite salto de línea */
+  white-space: normal !important;
   overflow: visible !important;
 }
 
-/* 🔥 CLAVE: agrandar altura de celdas */
+/*agrandar altura de celdas */
 .fc-daygrid-day-frame {
-  min-height: 100px; /* ajustá a gusto */
+  min-height: 100px;
 }
 
 /* MÁS ESPACIO PARA EVENTOS */
@@ -169,4 +167,36 @@ button:hover {
 /* HOY */
 .fc-day-today {
   background-color: #1e3a8a !important;
+}
+/* DIALOG DARK MODE */
+.custom-dialog .p-dialog {
+  background: #111827;
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+}
+
+.custom-dialog .p-dialog-header {
+  background: #111827;
+  color: #ffffff;
+  border-bottom: 1px solid #1f2937;
+  font-weight: 600;
+}
+
+.custom-dialog .p-dialog-content {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+.custom-dialog .p-dialog-header-icon {
+  color: #9ca3af;
+}
+
+.custom-dialog .p-dialog-header-icon:hover {
+  color: #ffffff;
+}
+
+/* overlay (fondo oscuro atrás) */
+.p-dialog-mask {
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.6) !important;
 }
