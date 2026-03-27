@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
@@ -31,9 +31,9 @@ const Login = () => {
       <Divider />
       <p className="p-text-secondary">
         ¿No tienes cuenta?{" "}
-        <a href="/register" className="p-text-primary">
+        <Link to="/register" className="p-text-primary">
           Regístrate
-        </a>
+        </Link>
       </p>
     </div>
   );
