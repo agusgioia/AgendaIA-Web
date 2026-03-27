@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -39,9 +39,9 @@ const Register = () => {
       <Divider />
       <p className="p-text-secondary">
         ¿Ya tienes cuenta?{" "}
-        <a href="/login" className="p-text-primary">
+        <Link to="/login" className="p-text-primary">
           Inicia sesión
-        </a>
+        </Link>
       </p>
     </div>
   );
