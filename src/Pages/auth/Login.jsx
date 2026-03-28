@@ -2,66 +2,93 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
 import { Link, useNavigate } from "react-router-dom";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
-import { Message } from "primereact/message";
-import { Divider } from "primereact/divider";
-import { Password } from "primereact/password";
+import s from "./AuthStyles";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/");
     } catch (err) {
       console.error(err);
-      setError("Credenciales inválidas: " + err.message);
+      setError("Credenciales inválidas. Revisá tu correo y contraseña.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const footer = (
-    <div className="p-text-center">
-      <Divider />
-      <p className="p-text-secondary">
-        ¿No tienes cuenta?{" "}
-        <Link to="/register" className="p-text-primary">
-          Regístrate
-        </Link>
-      </p>
-    </div>
-  );
-
   return (
-    <div className="login-container" id="login">
-      <Card title="Iniciar Sesión" footer={footer} className="login-card">
-        {error && <Message severity="error" summary="Error" detail={error} />}
-        <form onSubmit={handleLogin}>
-          <div className="p-field">
-            <label htmlFor="email">Correo Electrónico</label>
-            <InputText
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+    <div className={s.page}>
+      <div className={s.wrapper}>
+        <div className={s.header}>
+          <div className={s.logo}>📅</div>
+          <h1 className={s.title}>Bienvenido de nuevo</h1>
+          <p className={s.subtitle}>Iniciá sesión para gestionar tu agenda</p>
+        </div>
+
+        <div className={s.card}>
+          {error && (
+            <div className={s.error}>
+              <span className="mt-0.5">⚠</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className={s.form}>
+            <div>
+              <label className={s.fieldLabel}>Correo electrónico</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="vos@ejemplo.com"
+                required
+                className={s.input}
+              />
+            </div>
+
+            <div>
+              <label className={s.fieldLabel}>Contraseña</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className={s.input}
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className={s.button}>
+              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+            </button>
+          </form>
+
+          <div className={s.dividerRow}>
+            <div className={s.dividerLine} />
+            <span className={s.dividerText}>o</span>
+            <div className={s.dividerLine} />
           </div>
-          <div className="p-field">
-            <label htmlFor="password">Contraseña</label>
-            <Password
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <Button type="submit" label="Iniciar Sesión" className="p-mt-2" />
-        </form>
-      </Card>
+
+          <p className={s.linkRow}>
+            ¿No tenés cuenta?{" "}
+            <Link to="/register" className={s.link}>
+              Registrate
+            </Link>
+          </p>
+        </div>
+
+        <p className={s.footer}>Agenda IA — Tu asistente personal</p>
+      </div>
     </div>
   );
 };

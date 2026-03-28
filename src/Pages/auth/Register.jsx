@@ -5,88 +5,110 @@ import {
   createUserWithEmailAndPassword,
   updateCurrentUser,
 } from "firebase/auth";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
-import { Message } from "primereact/message";
-import { Divider } from "primereact/divider";
-import { Password } from "primereact/password";
 import { createUser } from "../../Api/api";
+import s from "./AuthStyles";
 
 const Register = () => {
+  const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [nombre, setNombre] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const auth = getAuth();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       await updateCurrentUser(auth, { displayName: nombre });
-      await createUser({ name: nombre, email: email });
+      await createUser({ name: nombre, email });
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      setError("Error al registrarse: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const footer = (
-    <div className="p-text-center">
-      <Divider />
-      <p className="p-text-secondary">
-        ¿Ya tienes cuenta?{" "}
-        <Link to="/login" className="p-text-primary">
-          Inicia sesión
-        </Link>
-      </p>
-    </div>
-  );
-
   return (
-    <div id="register" className="register-wrapper">
-      <Card title="Registro" footer={footer} className="register-card">
-        <form onSubmit={handleRegister}>
-          <div className="p-field">
-            <label htmlFor="nombre">Nombre</label>
-            <InputText
-              id="nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ingresa tu nombre"
-            />
+    <div className={s.page}>
+      <div className={s.wrapper}>
+        <div className={s.header}>
+          <div className={s.logo}>✨</div>
+          <h1 className={s.title}>Crear cuenta</h1>
+          <p className={s.subtitle}>Tu asistente de agenda personal con IA</p>
+        </div>
+
+        <div className={s.card}>
+          {error && (
+            <div className={s.error}>
+              <span className="mt-0.5">⚠</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleRegister} className={s.form}>
+            <div>
+              <label className={s.fieldLabel}>Nombre</label>
+              <input
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder="Tu nombre"
+                required
+                className={s.input}
+              />
+            </div>
+
+            <div>
+              <label className={s.fieldLabel}>Correo electrónico</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="vos@ejemplo.com"
+                required
+                className={s.input}
+              />
+            </div>
+
+            <div>
+              <label className={s.fieldLabel}>Contraseña</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                required
+                minLength={6}
+                className={s.input}
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className={s.button}>
+              {loading ? "Creando cuenta..." : "Crear cuenta"}
+            </button>
+          </form>
+
+          <div className={s.dividerRow}>
+            <div className={s.dividerLine} />
+            <span className={s.dividerText}>o</span>
+            <div className={s.dividerLine} />
           </div>
-          <div className="p-field">
-            <label htmlFor="email">Correo Electrónico</label>
-            <InputText
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Ingresa tu correo electrónico"
-            />
-          </div>
-          <div className="p-field">
-            <label htmlFor="password">Contraseña</label>
-            <Password
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Ingresa tu contraseña"
-              toggleMask
-            />
-          </div>
-          {error && <Message severity="error" summary="Error" detail={error} />}
-          <Button
-            type="submit"
-            label="Registrarse"
-            className="p-button-primary"
-          />
-        </form>
-      </Card>
+
+          <p className={s.linkRow}>
+            ¿Ya tenés cuenta?{" "}
+            <Link to="/login" className={s.link}>
+              Iniciá sesión
+            </Link>
+          </p>
+        </div>
+
+        <p className={s.footer}>Agenda IA — Tu asistente personal</p>
+      </div>
     </div>
   );
 };
