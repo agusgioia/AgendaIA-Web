@@ -4,6 +4,7 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
+import { getMessaging, getToken } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,4 +19,16 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 await setPersistence(auth, browserLocalPersistence);
 
-export { auth };
+const messaging = getMessaging(app);
+const requestNotificationPermission = async () => {
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") return null;
+
+  const token = await getToken(messaging, {
+    vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+  });
+
+  return token;
+};
+
+export { auth, requestNotificationPermission, messaging };
