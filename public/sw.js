@@ -1,4 +1,4 @@
-/* global importScripts, firebase */
+/* global importScripts, firebase, clients */
 importScripts(
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js",
 );
@@ -7,11 +7,11 @@ importScripts(
 );
 
 firebase.initializeApp({
-  apiKey:"AIzaSyB-HRW5Ss1CjTUG6yiY-q7lw5x6pwELWYY",
-  authDomain:"ecommerce-84e80.firebaseapp.com",
-  projectId:"ecommerce-84e80",
-  messagingSenderId:"401405541993",
-  appId:"1:401405541993:web:f6c46e0a927aaba6792cf8",
+  apiKey: self.FIREBASE_API_KEY,
+  authDomain: self.FIREBASE_AUTH_DOMAIN,
+  projectId: self.FIREBASE_PROJECT_ID,
+  messagingSenderId: self.FIREBASE_MESSAGING_SENDER_ID,
+  appId: self.FIREBASE_APP_ID,
 });
 
 const messaging = firebase.messaging();
@@ -27,6 +27,7 @@ messaging.onBackgroundMessage((payload) => {
 const CACHE_NAME = "agenda-ia-v1";
 
 self.addEventListener("install", (e) => {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(["/", "/index.html"]);
@@ -40,4 +41,8 @@ self.addEventListener("fetch", (e) => {
       return res || fetch(e.request);
     }),
   );
+});
+
+self.addEventListener("activate", (e) => {
+  e.waitUntil(clients.claim());
 });
