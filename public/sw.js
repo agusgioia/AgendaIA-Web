@@ -1,7 +1,7 @@
 /* global importScripts, clients */
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE_NAME = "agenda-ia-v3";
+const CACHE_NAME = "agenda-ia-v4";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
