@@ -21,6 +21,10 @@ const messages = {
     text: "No soportado en este browser",
     style: "bg-gray-800 text-gray-500 cursor-default",
   },
+  blocked: { 
+    text: "⚙ Habilitá notificaciones desde la configuración", 
+    style: "bg-yellow-900 border border-yellow-700 text-yellow-300 cursor-default" 
+  }
 };
 
 export default function PushNotificationButton({ userId }) {
