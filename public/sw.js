@@ -7,11 +7,11 @@ importScripts(
 );
 
 firebase.initializeApp({
-  apiKey: self.FIREBASE_API_KEY,
-  authDomain: self.FIREBASE_AUTH_DOMAIN,
-  projectId: self.FIREBASE_PROJECT_ID,
-  messagingSenderId: self.FIREBASE_MESSAGING_SENDER_ID,
-  appId: self.FIREBASE_APP_ID,
+  apiKey: "AIzaSyB-HRW5Ss1CjTUG6yiY-q7lw5x6pwELWYY",
+  authDomain: "ecommerce-84e80.firebaseapp.com",
+  projectId: "ecommerce-84e80",
+  messagingSenderId: "401405541993",
+  appId: "1:401405541993:web:f6c46e0a927aaba6792cf8",
 });
 
 const messaging = firebase.messaging();
