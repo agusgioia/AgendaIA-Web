@@ -6,8 +6,9 @@ import OneSignal from "react-onesignal";
 
 OneSignal.init({
   appId: import.meta.env.VITE_ONESIGNAL_APP_ID,
-  serviceWorkerPath: "/sw.js",
-  notifyButton: { enable: true },
+  serviceWorkerParam: { scope: "/" },
+  serviceWorkerPath: "sw.js",
+  notifyButton: { enable: false },
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
