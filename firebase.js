@@ -21,12 +21,8 @@ await setPersistence(auth, browserLocalPersistence);
 
 const messaging = getMessaging(app);
 export const requestNotificationPermission = async () => {
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") return null;
-
   const registration = await navigator.serviceWorker.register("/sw.js");
 
-  // Esperar a que el service worker esté activo
   await new Promise((resolve) => {
     if (registration.active) {
       resolve();
