@@ -4,7 +4,6 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
-import { getMessaging, getToken } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -19,27 +18,4 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 await setPersistence(auth, browserLocalPersistence);
 
-const messaging = getMessaging(app);
-export const requestNotificationPermission = async () => {
-  const registration = await navigator.serviceWorker.register("/sw.js");
-
-  await new Promise((resolve) => {
-    if (registration.active) {
-      resolve();
-      return;
-    }
-    const worker = registration.installing || registration.waiting;
-    worker.addEventListener("statechange", (e) => {
-      if (e.target.state === "activated") resolve();
-    });
-  });
-
-  const token = await getToken(messaging, {
-    vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-    serviceWorkerRegistration: registration,
-  });
-
-  return token;
-};
-
-export { auth, messaging };
+export { auth };
