@@ -14,6 +14,10 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+export const updateFcmToken = async (id, token) => {
+  await api.put(`/users/${id}/fcmToken`, { fcmToken: token });
+};
+
 // Eventos
 export const getUserEvents = async (id) => {
   const response = await api.get(`/events/${id}`);

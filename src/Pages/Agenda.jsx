@@ -3,6 +3,7 @@ import Eventlist from "../Components/Eventlist";
 import { useEffect, useState } from "react";
 import { getId } from "../Api/api";
 import useAuth from "../Hooks/useAuth";
+import PushNotificationButton from "../Components/PushNotificationButton";
 
 export default function Agenda() {
   const { user } = useAuth();
@@ -24,6 +25,7 @@ export default function Agenda() {
 
         <p>Aquí se mostrará el calendario de eventos.</p>
         <Eventlist id={userId} />
+        <PushNotificationButton userId={userId} />
       </div>
     </Layout>
   );

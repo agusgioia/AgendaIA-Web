@@ -51,6 +51,7 @@ export default function Eventlist({ id }) {
       title: selectedEvent.raw.title,
       date: selectedEvent.raw.date,
       time: selectedEvent.raw.time?.substring(0, 5) ?? "",
+      reminderMinutes: selectedEvent.raw.reminderMinutes ?? "",
     });
     setError("");
     setEditing(true);
@@ -73,6 +74,7 @@ export default function Eventlist({ id }) {
         title: editForm.title,
         date: editForm.date,
         time: editForm.time || null,
+        reminderMinutes: editForm.reminderMinutes || null,
       });
       setShowModal(false);
       setEditing(false);
@@ -189,7 +191,27 @@ export default function Eventlist({ id }) {
                     className={inputClass}
                   />
                 </div>
-
+                <div>
+                  <label className={labelClass}>Recordatorio</label>
+                  <select
+                    value={editForm.reminderMinutes ?? ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        reminderMinutes: e.target.value
+                          ? parseInt(e.target.value)
+                          : null,
+                      })
+                    }
+                    className={inputClass}
+                  >
+                    <option value="">Sin recordatorio</option>
+                    <option value="10">10 minutos antes</option>
+                    <option value="30">30 minutos antes</option>
+                    <option value="60">1 hora antes</option>
+                    <option value="1440">1 día antes</option>
+                  </select>
+                </div>
                 {error && (
                   <div className="bg-red-950 border border-red-800 text-red-300 text-sm rounded-xl px-4 py-3">
                     ⚠ {error}
