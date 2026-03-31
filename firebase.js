@@ -26,6 +26,18 @@ export const requestNotificationPermission = async () => {
 
   const registration = await navigator.serviceWorker.register("/sw.js");
 
+  // Esperar a que el service worker esté activo
+  await new Promise((resolve) => {
+    if (registration.active) {
+      resolve();
+      return;
+    }
+    const worker = registration.installing || registration.waiting;
+    worker.addEventListener("statechange", (e) => {
+      if (e.target.state === "activated") resolve();
+    });
+  });
+
   const token = await getToken(messaging, {
     vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
     serviceWorkerRegistration: registration,
