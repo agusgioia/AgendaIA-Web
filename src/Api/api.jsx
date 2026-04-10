@@ -20,8 +20,8 @@ export const getUserEvents = async (id) => {
   return response.data;
 };
 
-export const createEvent = async (event) => {
-  const res = await api.post("/events", event);
+export const createEvent = async (event, email) => {
+  const res = await api.post(`/events?email=${email}`, event);
   return res.data;
 };
 

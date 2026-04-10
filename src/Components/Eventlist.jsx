@@ -3,18 +3,27 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { getUserEvents, deleteEvent, updateEvent } from "../Api/api";
+import {
+  getUserEvents,
+  deleteEvent,
+  updateEvent,
+  createEvent,
+} from "../Api/api";
 import { Dialog } from "primereact/dialog";
 
-export default function Eventlist({ id }) {
+export default function Eventlist({ id, email }) {
   const [events, setEvents] = useState([]);
   const [rawEvents, setRawEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ title: "", date: "", time: "" });
+  const [editForm, setEditForm] = useState({
+    title: "",
+    date: "",
+    time: "",
+    reminderMinutes: "",
+  });
   const [error, setError] = useState("");
 
   const loadEvents = useCallback(async () => {
@@ -38,50 +47,73 @@ export default function Eventlist({ id }) {
     loadEvents();
   }, [loadEvents]);
 
+  // 👉 CLICK EN EVENTO = EDIT
   const handleEventClick = (info) => {
     const raw = rawEvents.find((e) => String(e.id) === info.event.id);
+
     setSelectedEvent({ calEvent: info.event, raw });
-    setEditing(false);
+
+    setEditForm({
+      title: raw.title,
+      date: raw.date,
+      time: raw.time?.substring(0, 5) ?? "",
+      reminderMinutes: raw.reminderMinutes ?? "",
+    });
+
     setError("");
     setShowModal(true);
   };
 
-  const handleEditOpen = () => {
+  // 👉 CLICK EN DÍA = CREATE
+  const handleDateClick = (info) => {
+    setSelectedEvent(null);
+    setError("");
+
     setEditForm({
-      title: selectedEvent.raw.title,
-      date: selectedEvent.raw.date,
-      time: selectedEvent.raw.time?.substring(0, 5) ?? "",
-      reminderMinutes: selectedEvent.raw.reminderMinutes ?? "",
+      title: "",
+      date: info.dateStr,
+      time: "",
+      reminderMinutes: "",
     });
-    setError("");
-    setEditing(true);
+
+    setShowModal(true);
   };
 
-  const handleEditCancel = () => {
-    setEditing(false);
-    setError("");
-  };
-
-  const handleEditSave = async () => {
+  const handleSave = async () => {
     if (!editForm.title.trim() || !editForm.date) {
       setError("El título y la fecha son obligatorios.");
       return;
     }
+
     setSaving(true);
     setError("");
+
     try {
-      await updateEvent(selectedEvent.raw.id, {
-        title: editForm.title,
-        date: editForm.date,
-        time: editForm.time || null,
-        reminderMinutes: editForm.reminderMinutes || null,
-      });
+      if (selectedEvent) {
+        await updateEvent(selectedEvent.raw.id, {
+          title: editForm.title,
+          date: editForm.date,
+          time: editForm.time || null,
+          reminderMinutes: editForm.reminderMinutes || null,
+        });
+      } else {
+        await createEvent(
+          {
+            userId: id,
+            title: editForm.title,
+            date: editForm.date,
+            time: editForm.time || null,
+            reminderMinutes: editForm.reminderMinutes || null,
+          },
+          email,
+        );
+      }
+
       setShowModal(false);
-      setEditing(false);
       setSelectedEvent(null);
       await loadEvents();
     } catch (e) {
-      setError("No se pudo guardar el evento. Intentá de nuevo.");
+      setError("No se pudo guardar el evento.");
       console.error(e);
     } finally {
       setSaving(false);
@@ -90,29 +122,25 @@ export default function Eventlist({ id }) {
 
   const handleDelete = async () => {
     if (!selectedEvent?.raw?.id) return;
+
     setDeleting(true);
     setError("");
+
     try {
       await deleteEvent(selectedEvent.raw.id);
       setShowModal(false);
       setSelectedEvent(null);
       await loadEvents();
-    } catch (e) {
-      setError("No se pudo eliminar el evento. Intentá de nuevo.");
-      console.error(e);
+    } catch (error) {
+      setError("No se pudo eliminar el evento." + error.message);
     } finally {
       setDeleting(false);
     }
   };
 
-  const formatTime = (date) => {
-    if (!date) return null;
-    if (date.getHours() === 0 && date.getMinutes() === 0) return null;
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
   const inputClass =
     "w-full bg-gray-700 border border-gray-600 text-white placeholder-gray-400 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition";
+
   const labelClass = "block text-gray-400 text-xs mb-1.5";
 
   return (
@@ -126,6 +154,7 @@ export default function Eventlist({ id }) {
         height="auto"
         dayMaxEventRows={2}
         eventClick={handleEventClick}
+        dateClick={handleDateClick}
         headerToolbar={{
           left: "prev,next today",
           center: "title",
@@ -134,15 +163,11 @@ export default function Eventlist({ id }) {
       />
 
       <Dialog
-        header={
-          editing
-            ? "Editar evento"
-            : (selectedEvent?.calEvent?.title ?? "Evento")
-        }
+        header={selectedEvent ? "Editar evento" : "Nuevo evento"}
         visible={showModal}
         onHide={() => {
           setShowModal(false);
-          setEditing(false);
+          setSelectedEvent(null);
         }}
         style={{ width: "30rem" }}
         breakpoints={{ "960px": "75vw", "640px": "95vw" }}
@@ -150,134 +175,98 @@ export default function Eventlist({ id }) {
         modal
         dismissableMask
       >
-        {selectedEvent && (
-          <div className="flex flex-col gap-3 text-gray-200">
-            {editing ? (
-              <>
-                {/* Formulario de edición */}
-                <div>
-                  <label className={labelClass}>Título</label>
-                  <input
-                    type="text"
-                    value={editForm.title}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, title: e.target.value })
-                    }
-                    className={inputClass}
-                    placeholder="Título del evento"
-                  />
-                </div>
-
-                <div>
-                  <label className={labelClass}>Fecha</label>
-                  <input
-                    type="date"
-                    value={editForm.date}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, date: e.target.value })
-                    }
-                    className={inputClass}
-                  />
-                </div>
-
-                <div>
-                  <label className={labelClass}>Hora (opcional)</label>
-                  <input
-                    type="time"
-                    value={editForm.time}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, time: e.target.value })
-                    }
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Recordatorio</label>
-                  <select
-                    value={editForm.reminderMinutes ?? ""}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        reminderMinutes: e.target.value
-                          ? parseInt(e.target.value)
-                          : null,
-                      })
-                    }
-                    className={inputClass}
-                  >
-                    <option value="">Sin recordatorio</option>
-                    <option value="10">10 minutos antes</option>
-                    <option value="30">30 minutos antes</option>
-                    <option value="60">1 hora antes</option>
-                    <option value="1440">1 día antes</option>
-                  </select>
-                </div>
-                {error && (
-                  <div className="bg-red-950 border border-red-800 text-red-300 text-sm rounded-xl px-4 py-3">
-                    ⚠ {error}
-                  </div>
-                )}
-
-                <div className="flex gap-2 mt-1">
-                  <button
-                    onClick={handleEditCancel}
-                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl py-2.5 text-sm transition"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleEditSave}
-                    disabled={saving}
-                    className="flex-1 bg-sky-500 hover:bg-sky-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl py-2.5 text-sm transition"
-                  >
-                    {saving ? "Guardando..." : "Guardar"}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                {/* Vista de detalle */}
-                <div className="bg-gray-800 p-3 rounded">
-                  <span className="text-gray-400 text-sm">Fecha</span>
-                  <p className="font-semibold">
-                    {selectedEvent.calEvent.start.toLocaleDateString()}
-                  </p>
-                </div>
-
-                {formatTime(selectedEvent.calEvent.start) && (
-                  <div className="bg-gray-800 p-3 rounded">
-                    <span className="text-gray-400 text-sm">Hora</span>
-                    <p className="font-semibold">
-                      {formatTime(selectedEvent.calEvent.start)}
-                    </p>
-                  </div>
-                )}
-
-                {error && (
-                  <div className="bg-red-950 border border-red-800 text-red-300 text-sm rounded-xl px-4 py-3">
-                    ⚠ {error}
-                  </div>
-                )}
-
-                <div className="flex gap-2 mt-1">
-                  <button
-                    onClick={handleEditOpen}
-                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl py-2.5 text-sm transition"
-                  >
-                    ✏ Editar
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl py-2.5 text-sm transition"
-                  >
-                    {deleting ? "Eliminando..." : "🗑 Eliminar"}
-                  </button>
-                </div>
-              </>
-            )}
+        <div className="flex flex-col gap-3 text-gray-200">
+          <div>
+            <label className={labelClass}>Título</label>
+            <input
+              type="text"
+              value={editForm.title}
+              onChange={(e) =>
+                setEditForm({ ...editForm, title: e.target.value })
+              }
+              className={inputClass}
+            />
           </div>
-        )}
+
+          <div>
+            <label className={labelClass}>Fecha</label>
+            <input
+              type="date"
+              value={editForm.date}
+              onChange={(e) =>
+                setEditForm({ ...editForm, date: e.target.value })
+              }
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Hora</label>
+            <input
+              type="time"
+              value={editForm.time}
+              onChange={(e) =>
+                setEditForm({ ...editForm, time: e.target.value })
+              }
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Recordatorio</label>
+            <select
+              value={editForm.reminderMinutes ?? ""}
+              onChange={(e) =>
+                setEditForm({
+                  ...editForm,
+                  reminderMinutes: e.target.value
+                    ? parseInt(e.target.value)
+                    : null,
+                })
+              }
+              className={inputClass}
+            >
+              <option value="">Sin recordatorio</option>
+              <option value="10">10 minutos antes</option>
+              <option value="30">30 minutos antes</option>
+              <option value="60">1 hora antes</option>
+              <option value="1440">1 día antes</option>
+            </select>
+          </div>
+
+          {error && (
+            <div className="bg-red-950 border border-red-800 text-red-300 text-sm rounded-xl px-4 py-3">
+              ⚠ {error}
+            </div>
+          )}
+
+          <div className="flex gap-2 mt-2">
+            {selectedEvent && (
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-medium rounded-xl py-2.5 text-sm transition"
+              >
+                {deleting ? "Eliminando..." : "🗑 Eliminar"}
+              </button>
+            )}
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl py-2.5 text-sm transition"
+            >
+              Cancelar
+            </button>
+
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-white font-medium rounded-xl py-2.5 text-sm transition"
+            >
+              {saving ? "Guardando..." : "Guardar"}
+            </button>
+          </div>
+        </div>
       </Dialog>
     </div>
   );

@@ -25,7 +25,7 @@ export default function Agenda() {
 
         <p>Aquí se mostrará el calendario de eventos.</p>
         <Eventlist id={userId} />
-        <PushNotificationButton userId={userId} />
+        <PushNotificationButton userId={userId} email={user?.email} />
       </div>
     </Layout>
   );
