@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  updateCurrentUser,
+  updateProfile,
 } from "firebase/auth";
 import { createUser } from "../../Api/api";
 import s from "./AuthStyles";
@@ -22,9 +22,13 @@ const Register = () => {
     setLoading(true);
     setError("");
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      await updateCurrentUser(auth, { displayName: nombre });
-      await createUser({ name: nombre, email });
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      await updateProfile(userCredential.user, { displayName: nombre });
+      await createUser({ name: nombre, email: email });
       navigate("/login");
     } catch (err) {
       setError("Error al registrarse: " + err.message);

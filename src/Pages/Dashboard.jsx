@@ -10,18 +10,20 @@ export default function Dashboard() {
   const [id, setId] = useState(null);
 
   useEffect(() => {
-    if (user) {
-      const loadId = async () => {
-        try {
-          const response = await getId(user.email);
-          console.log(response);
-          setId(response.id);
-        } catch (e) {
-          console.error(e);
+    const loadId = async () => {
+      try {
+        const response = await getId(user.email);
+        if (!response) {
+          console.error("Usuario no encontrado en la base de datos");
+          return;
         }
-      };
-      loadId();
-    }
+        setId(response.id);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    loadId();
   }, [user]);
 
   if (!user || !id) {

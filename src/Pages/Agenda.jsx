@@ -13,6 +13,7 @@ export default function Agenda() {
     const getUserId = async () => {
       if (!user) return;
       const data = await getId(user.email);
+      if (!data) return;
       setUserId(data.id);
     };
     getUserId();
