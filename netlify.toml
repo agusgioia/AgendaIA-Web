@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  VITE_API_URL = "https://juicy-clea-personalizatuviaje-724e8c67.koyeb.app"
+  VITE_API_URL = "https://juicy-clea-personalizatuviaje-724e8c67.koyeb.app/"
 
 [[redirects]]
   from = "/*"
