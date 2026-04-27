@@ -1,60 +1,71 @@
 import axios from "axios";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+const localApi = axios.create({
+  baseURL: import.meta.env.VITE_API_URL_LOCAL,
+});
 
 // Adjunta el token de Firebase en cada request automáticamente
-api.interceptors.request.use(async (config) => {
-  const auth = getAuth();
-  const user = auth.currentUser;
-  if (user) {
-    const token = await user.getIdToken(true);
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+const getFirebaseToken = () =>
+  new Promise((resolve) => {
+    const auth = getAuth();
+    if (auth.currentUser) {
+      resolve(auth.currentUser.getIdToken(true));
+    } else {
+      const unsub = onAuthStateChanged(auth, (user) => {
+        unsub();
+        resolve(user ? user.getIdToken(true) : null);
+      });
+    }
+  });
+
+localApi.interceptors.request.use(async (config) => {
+  const token = await getFirebaseToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
 // Eventos
 export const getUserEvents = async (id) => {
-  const response = await api.get(`/events/${id}`);
+  const response = await localApi.get(`/events/${id}`);
   return response.data;
 };
 
 export const createEvent = async (event, email) => {
-  const res = await api.post(`/events?email=${email}`, event);
+  const res = await localApi.post(`/events?email=${email}`, event);
   return res.data;
 };
 
 export const updateEvent = async (id, event) => {
-  const res = await api.put(`/events/${id}`, event);
+  const res = await localApi.put(`/events/${id}`, event);
   return res.data;
 };
 
 export const deleteEvent = async (id) => {
-  const res = await api.delete(`/events/${id}`);
+  const res = await localApi.delete(`/events/${id}`);
   return res.data;
 };
 
 // Voz
 export const sendVoice = async (text, email) => {
-  const response = await api.post(`/voice?email=${email}`, { text });
+  const response = await localApi.post(`/voice?email=${email}`, { text });
   return response.data;
 };
 
 // Usuarios
 export const getId = async (email) => {
-  const response = await api.get(`/users?email=${email}`);
+  const response = await localApi.get(`/users?email=${email}`);
   return response.data;
 };
 
 export const getUser = async (id) => {
-  const response = await api.get(`/users/${id}`);
+  const response = await localApi.get(`/users/${id}`);
   return response.data;
 };
 
 export const createUser = async (user) => {
-  const res = await api.post("/users", user);
+  const res = await localApi.post("/users", user);
   return res.data;
 };
 
-export default api;
+export default localApi;

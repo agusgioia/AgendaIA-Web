@@ -1,8 +1,9 @@
 {
   "name": "Agenda IA",
-  "short_name": "AgendaIA",
-  "start_url": ".",
+  "short_name": "Agenda",
+  "start_url": "/",
   "display": "standalone",
+  "gcm_sender_id": "482941778795",
   "background_color": "#111827",
   "theme_color": "#111827",
   "description": "Agenda con asistente de voz",
