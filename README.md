@@ -1,156 +1,100 @@
 # 📅 Agenda IA
 
-Aplicación web de agenda personal con asistente de voz impulsado por inteligencia artificial. Permite crear y gestionar eventos hablando en lenguaje natural en español.
+> Agenda personal con asistente de voz en español impulsado por IA. Hablás en lenguaje natural y el sistema crea, consulta y gestiona tus eventos automáticamente.
+
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4-6DB33F?logo=springboot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?logo=firebase&logoColor=black)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+![Vercel](https://img.shields.io/badge/Frontend-Vercel-black?logo=vercel)
+![Koyeb](https://img.shields.io/badge/Backend-Koyeb-121212?logo=koyeb)
 
 ---
 
-## 🧠 ¿Qué hace?
-
-- Interpretás comandos de voz como _"agendar reunión mañana a las 10"_ y el sistema crea el evento automáticamente.
-- Podés preguntar _"¿qué tengo para hoy?"_ o _"¿qué eventos tengo esta semana?"_ y el asistente te responde en voz alta.
-- Los eventos se muestran en un calendario interactivo con vistas diaria, semanal y mensual.
-- Podés crear, editar y eliminar eventos también desde el calendario directamente.
-- Soporta recordatorios push vía OneSignal (10 min, 30 min, 1 hora o 1 día antes).
-- La autenticación es gestionada por Firebase (email/password).
+## 🟢 Demo en vivo → [agenda-ia-web.vercel.app](https://agenda-ia-web.vercel.app)
 
 ---
 
-## 🛠 Stack
+
+## ✨ ¿Qué hace?
+
+- 🎙️ **Comandos de voz en español** — decís *"agendar reunión mañana a las 10"* y el evento se crea automáticamente.
+- 🤖 **Pipeline de IA propio** — combina reglas con regex/keywords y un LLM (Groq / LLaMA 3.3 70B) para interpretar intents complejos o ambiguos.
+- 🗓️ **Calendario interactivo** — vistas diaria, semanal y mensual con FullCalendar. CRUD completo desde la UI.
+- 🔒 **Autenticación segura** — Firebase Auth con validación de JWT en cada request al backend.
+- 💬 **Contexto conversacional** — si el asistente necesita más datos (ej: falta la hora), pregunta y guarda el estado hasta completar el evento.
+
+---
+
+## 🛠 Stack tecnológico
 
 ### Frontend
-
-| Tecnología        | Uso                                   |
-| ----------------- | ------------------------------------- |
-| React 19 + Vite 8 | Framework y bundler                   |
-| TailwindCSS 3     | Estilos                               |
-| PrimeReact 10     | Componentes UI (Dialog, Button, etc.) |
-| FullCalendar 6    | Calendario interactivo                |
-| Firebase 12       | Autenticación (email/password)        |
-| Axios             | Llamadas HTTP a la API                |
-| React Router 7    | Navegación y rutas protegidas         |
-| OneSignal         | Push notifications                    |
+| Tecnología | Versión | Uso |
+|---|---|---|
+| React | 19 | Framework principal |
+| Vite | 8 | Bundler |
+| TailwindCSS | 3 | Estilos |
+| PrimeReact | 10 | Componentes UI |
+| FullCalendar | 6 | Calendario interactivo |
+| Firebase | 12 | Autenticación (email/password) |
+| React Router | 7 | Rutas públicas y privadas |
+| Axios | — | Llamadas HTTP a la API |
 
 ### Backend
-
-| Tecnología      | Uso                              |
-| --------------- | -------------------------------- |
-| Spring Boot 4   | Framework principal              |
-| Spring Data JPA | Acceso a base de datos           |
-| PostgreSQL      | Base de datos                    |
-| Lombok          | Reducción de boilerplate         |
-| Firebase Admin  | Verificación de tokens JWT       |
-| Groq API        | Interpretación de intents con IA |
-| OneSignal API   | Envío de notificaciones push     |
+| Tecnología | Versión | Uso |
+|---|---|---|
+| Spring Boot | 4 | Framework principal |
+| Spring Data JPA | — | Acceso a base de datos |
+| PostgreSQL | 16 | Base de datos |
+| Groq API (LLaMA 3.3 70B) | — | Interpretación de intents con IA |
+| Firebase Admin SDK | — | Verificación de tokens JWT |
+| Lombok | — | Reducción de boilerplate |
+| Docker | — | Containerización del backend |
 
 ---
 
-## 🏗 Arquitectura
+## 🏗 Arquitectura del asistente de voz
 
 ```
 Usuario habla / escribe
-    ↓
+        ↓
 Web Speech API (browser) / input de texto
-    ↓
-POST /voice?email=...   { text: "agendar reunión mañana a las 10" }
-    ↓
+        ↓
+POST /voice?email=...  { text: "agendar reunión mañana a las 10" }
+        ↓
 InterpreterService
-  ├── Reglas simples (regex + keywords)   →  IntentResult
-  └── AIService (Groq API) si no matchea  →  IntentResult
-    ↓
+  ├── Reglas simples (regex + keywords)  →  IntentResult  ✅
+  └── AIService (Groq / LLaMA 3.3 70B)  →  IntentResult  🤖
+        ↓
 VoiceController  →  switch(intent)
   ├── create_event  →  AgendaService.createEvent()
   ├── read_today    →  AgendaService.getTodayEvents()
   └── read_week     →  AgendaService.getWeekEvents()
-    ↓
-VoiceResponse { response: "Evento creado: ..." }
-    ↓
-SpeechSynthesis API (browser) lee la respuesta
+        ↓
+VoiceResponse { response: "Evento creado: Reunión · mañana 10:00 hs" }
+        ↓
+SpeechSynthesis API (browser) lee la respuesta en voz alta
 ```
+
+> El `PendingIntentService` mantiene contexto de conversaciones incompletas en memoria, permitiendo diálogos de múltiples turnos para completar un evento.
 
 ---
 
-## 📁 Estructura del proyecto
+## 🔌 API REST
 
-```
-├── src/                              # Frontend React
-│   ├── Api/api.jsx                   # Llamadas HTTP con Axios + Firebase token
-│   ├── App.jsx
-│   ├── Components/
-│   │   ├── Eventlist.jsx             # Calendario con FullCalendar (CRUD)
-│   │   ├── Header.jsx
-│   │   ├── Layout.jsx
-│   │   ├── Navbar.jsx
-│   │   ├── PushNotificationButton.jsx # Activar recordatorios push
-│   │   └── VoiceAssistant.jsx        # Micrófono + TTS + input de texto
-│   ├── Context/
-│   │   ├── AuthContext.jsx
-│   │   └── AuthProvider.jsx          # Firebase onAuthStateChanged
-│   ├── Hooks/
-│   │   ├── useAuth.jsx
-│   │   └── usePushNotifications.js   # Lógica de OneSignal
-│   ├── Pages/
-│   │   ├── Agenda.jsx
-│   │   ├── Dashboard.jsx
-│   │   └── auth/
-│   │       ├── Login.jsx
-│   │       └── Register.jsx
-│   └── Router/Router.jsx             # Rutas públicas y privadas
-│
-├── src/main/java/com/Agenda/IA/      # Backend Spring Boot
-│   ├── Controllers/
-│   │   ├── AgendaController.java     # GET/POST/PUT/DELETE /events
-│   │   ├── UserController.java       # GET/POST /users
-│   │   ├── VoiceController.java      # POST /voice
-│   │   └── HealthController.java     # GET /health
-│   ├── Services/
-│   │   ├── AgendaService.java
-│   │   ├── InterpreterService.java
-│   │   ├── AIService.java            # Integración Groq
-│   │   ├── PendingIntentService.java # Contexto de conversación en memoria
-│   │   └── ReminderScheduler.java    # Cron de recordatorios push
-│   ├── Models/
-│   │   ├── Event.java
-│   │   └── User.java
-│   ├── Repositories/
-│   │   ├── EventRepository.java
-│   │   └── UserRepository.java
-│   ├── Security/
-│   │   └── FirebaseAuthFilter.java   # Validación de token JWT
-│   └── Config/
-│       ├── FirebaseConfig.java
-│       ├── SecurityConfig.java
-│       └── GlobalExceptionHandler.java
-│
-├── Dockerfile                        # Build multi-stage del backend
-├── firebase.js                       # Configuración Firebase (frontend)
-└── vercel.json                       # Rewrite rules para SPA
-```
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| `GET` | `/health` | ❌ | Health check |
+| `POST` | `/users` | ❌ | Crear usuario |
+| `GET` | `/users?email={email}` | ❌ | Obtener usuario por email |
+| `GET` | `/events/{userId}` | 🔒 Firebase | Eventos del usuario |
+| `POST` | `/events?email={email}` | 🔒 Firebase | Crear evento |
+| `PUT` | `/events/{id}` | 🔒 Firebase | Editar evento |
+| `DELETE` | `/events/{id}` | 🔒 Firebase | Eliminar evento |
+| `POST` | `/voice?email={email}` | 🔒 Firebase | Procesar comando de voz / texto |
 
----
-
-## ⚙️ Variables de entorno
-
-### Frontend (`.env`)
-
-```env
-VITE_API_URL=http://localhost:8080
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_FIREBASE_MESSAGING_SENDER_ID=...
-VITE_FIREBASE_APP_ID=...
-```
-
-### Backend
-
-```env
-DB_URL=jdbc:postgresql://localhost:5432/agendaia
-DB_USER=postgres
-DB_PASSWORD=...
-GROQ_API_KEY=gsk_...              # Groq API Key
-FIREBASE_SERVICE_ACCOUNT_JSON=... # JSON del service account de Firebase (todo en una línea)
-```
+> Los endpoints 🔒 requieren el header `Authorization: Bearer <firebase-id-token>`.
 
 ---
 
@@ -165,8 +109,11 @@ FIREBASE_SERVICE_ACCOUNT_JSON=... # JSON del service account de Firebase (todo e
 mvn clean package -DskipTests
 
 # Ejecutar
-DB_URL=... DB_USER=... DB_PASSWORD=... GROQ_API_KEY=... \
-FIREBASE_SERVICE_ACCOUNT_JSON='...' \
+DB_URL=jdbc:postgresql://localhost:5432/agendaia \
+DB_USER=postgres \
+DB_PASSWORD=tu_password \
+GROQ_API_KEY=gsk_... \
+FIREBASE_SERVICE_ACCOUNT_JSON='{ ... }' \
 java -jar target/*.jar
 ```
 
@@ -174,14 +121,13 @@ java -jar target/*.jar
 
 ```bash
 docker build -t agendaia-backend .
+
 docker run -p 8080:8080 \
-  -e DB_URL=... \
-  -e DB_USER=... \
+  -e DB_URL=jdbc:postgresql://host:5432/agendaia \
+  -e DB_USER=postgres \
   -e DB_PASSWORD=... \
   -e GROQ_API_KEY=... \
   -e FIREBASE_SERVICE_ACCOUNT_JSON='...' \
-  -e ONE_SIGNAL_ID=... \
-  -e ONE_SIGNAL_KEY=... \
   agendaia-backend
 ```
 
@@ -192,46 +138,55 @@ docker run -p 8080:8080 \
 ```bash
 npm install
 npm run dev
+# Disponible en http://localhost:5173
 ```
 
-Abre en `http://localhost:5173`
+### Variables de entorno — Frontend (`.env`)
 
----
-
-## 🔌 Endpoints de la API
-
-| Método   | Ruta                    | Auth     | Descripción               |
-| -------- | ----------------------- | -------- | ------------------------- |
-| `GET`    | `/health`               | No       | Health check              |
-| `GET`    | `/users?email={email}`  | No       | Obtener usuario por email |
-| `GET`    | `/users/{id}`           | No       | Obtener usuario por ID    |
-| `POST`   | `/users`                | No       | Crear usuario             |
-| `GET`    | `/events/{userId}`      | Firebase | Eventos del usuario       |
-| `POST`   | `/events?email={email}` | Firebase | Crear evento              |
-| `PUT`    | `/events/{id}`          | Firebase | Editar evento             |
-| `DELETE` | `/events/{id}`          | Firebase | Eliminar evento           |
-| `POST`   | `/voice?email={email}`  | Firebase | Procesar comando de voz   |
-
-> Los endpoints marcados con Firebase requieren el header `Authorization: Bearer <firebase-id-token>`.
-
----
-
-## 🤖 Cómo funciona el asistente de IA
-
-El `InterpreterService` primero intenta resolver el intent con reglas simples (keywords y regex). Si el mensaje es ambiguo o complejo, delega al `AIService`, que llama a la **Groq API** con el modelo `llama-3.3-70b-versatile` y espera una respuesta JSON:
-
-```json
-{
-  "intent": "create_event",
-  "title": "reunión con el cliente",
-  "date": "2025-05-15",
-  "time": "10:00"
-}
+```env
+VITE_API_URL=http://localhost:8080
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
 ```
 
-El `PendingIntentService` guarda en memoria el contexto de conversaciones incompletas (por ejemplo, si el usuario dice el título pero no la hora). Cuando el evento se completa, el contexto se limpia.
+---
 
-Los intents soportados son `create_event`, `read_today` y `read_week`.
+## 📁 Estructura del proyecto
+
+```
+AgendaIA-Web/
+├── src/
+│   ├── Api/api.jsx                       # Llamadas HTTP con Axios + Firebase token
+│   ├── Components/
+│   │   ├── Eventlist.jsx                 # Calendario con FullCalendar (CRUD)
+│   │   ├── VoiceAssistant.jsx            # Micrófono + TTS + input de texto
+│   │   └── PushNotificationButton.jsx    # Activar recordatorios push
+│   ├── Context/
+│   │   └── AuthProvider.jsx              # Firebase onAuthStateChanged
+│   ├── Hooks/
+│   │   └── usePushNotifications.js       # Lógica de OneSignal
+│   ├── Pages/
+│   │   ├── Agenda.jsx
+│   │   ├── Dashboard.jsx
+│   │   └── auth/ (Login · Register)
+│   └── Router/Router.jsx                 # Rutas públicas y privadas
+│
+└── [Backend repo separado → agusgioia/AgendaIA-Api]
+    └── src/main/java/com/Agenda/IA/
+        ├── Controllers/   (Agenda · User · Voice · Health)
+        ├── Services/      (Agenda · Interpreter · AI · PendingIntent · ReminderScheduler)
+        ├── Security/      (FirebaseAuthFilter)
+        └── Config/        (Firebase · Security · GlobalExceptionHandler)
+```
 
 ---
+
+## 🔗 Repositorios relacionados
+
+- **Frontend (este repo):** [agusgioia/AgendaIA-Web](https://github.com/agusgioia/AgendaIA-Web)
+- **Backend:** [agusgioia/AgendaIA-Api](https://github.com/agusgioia/AgendaIA-Api)
 
