@@ -1,14 +1,35 @@
-const CACHE_NAME = "agenda-ia-v1";
+const CACHE_NAME = "agenda-ia-v2";
+const STATIC_ASSETS = ["/", "/index.html"];
 
-self.addEventListener("install", () => {
+self.addEventListener("install", (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)),
+  );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (e) => {
+  // Limpiar caches viejas
+  e.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)),
+        ),
+      ),
+  );
   e.waitUntil(self.clients.claim());
 });
 
-// Solo responde con lo que hay en cache o busca en red
 self.addEventListener("fetch", (e) => {
-  e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+  // Para navegación: devolver index.html desde cache
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      caches.match("/index.html").then((cached) => cached || fetch(e.request)),
+    );
+    return;
+  }
+  // Para el resto: red primero, cache como fallback
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });
