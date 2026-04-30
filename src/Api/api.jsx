@@ -2,7 +2,7 @@ import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const localApi = axios.create({
-  baseURL: import.meta.env.VITE_API_URL? import.meta.env.VITE_API_URL : import.meta.env.VITE_API_URL_LOCAL,
+  baseURL: import.meta.env.VITE_API_URL_LOCAL,
 });
 
 // Adjunta el token de Firebase en cada request automáticamente
